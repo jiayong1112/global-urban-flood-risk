@@ -106,7 +106,9 @@ def main():
         "FD": r["exDmg_pctGDP"], "FD_P": r["exDmg_pros_pctGDP"],
         "IR": r["exInunD_pctGDP"], "IR_P": r["exInunD_pros_pctGDP"]})
 
-    order = a["FD"].sort_values(ascending=False).index.tolist()
+    # fixed alphabetical grouping (top to bottom): Africa; Americas; Asias; Europe; Oceania
+    order = ["Africa", "N America", "C America", "S America",
+             "E Asia", "C Asia", "S Asia", "SE Asia", "SW Asia", "Europe", "Oceania"]
 
     fig, axes = plt.subplots(1, 3, figsize=(7.2, 4.4), sharey=False)
     draw_panel(axes[0], a, order, "(a) Share of global risk intensity",

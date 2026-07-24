@@ -36,7 +36,10 @@ CITY_CENTER = {  # lon, lat of the yellow triangle
     "Shanghai": (121.47, 31.23), "Guangzhou": (113.26, 23.13),
     "Bangkok": (100.50, 13.75), "Dhaka": (90.41, 23.81),
 }
-TARGET_W = 1500  # output width per panel in px
+# all four panels are rendered to this identical pixel grid so they share height and
+# width; each city's extent is cropped (centered) to the common display aspect first
+COMMON_ASPECT = 1.40   # display width / height (mean of the four city extents)
+OUT_W, OUT_H = 1400, 1000  # 1400/1000 = 1.40
 
 # risk stretch (inverted) and basemap stretch
 R_MIN, R_MAX = 0.1, 0.01
@@ -48,23 +51,39 @@ def stretch_risk(band):
     return np.clip((band - R_MIN) / (R_MAX - R_MIN), 0, 1)
 
 
+def crop_to_aspect(bounds):
+    """Crop (left, bottom, right, top) centered to COMMON_ASPECT in display units."""
+    l, b, r, t = bounds
+    cosphi = np.cos(np.radians((t + b) / 2))
+    disp_w = (r - l) * cosphi
+    disp_h = t - b
+    if disp_w / disp_h > COMMON_ASPECT:      # too wide -> trim longitude
+        new_lon = (COMMON_ASPECT * disp_h) / cosphi
+        cx = (l + r) / 2
+        l, r = cx - new_lon / 2, cx + new_lon / 2
+    else:                                     # too tall -> trim latitude
+        new_lat = disp_w / COMMON_ASPECT
+        cy = (t + b) / 2
+        b, t = cy - new_lat / 2, cy + new_lat / 2
+    return l, b, r, t
+
+
 def build_grid(risk_path, s2_path):
-    """Reproject risk (nearest, NaN-aware) and S2 (bilinear) onto one target grid."""
+    """Crop to the common aspect, then reproject risk/S2 onto the fixed OUT_W x OUT_H grid."""
     with rasterio.open(risk_path) as rsrc:
-        b = rsrc.bounds
-        h = int(round(TARGET_W * (rsrc.height / rsrc.width)))
-        dst_transform = rasterio.transform.from_bounds(b.left, b.bottom, b.right, b.top, TARGET_W, h)
-        risk = np.full((3, h, TARGET_W), np.nan, np.float32)
+        l, b, r, t = crop_to_aspect(tuple(rsrc.bounds))
+        dst_transform = rasterio.transform.from_bounds(l, b, r, t, OUT_W, OUT_H)
+        risk = np.full((3, OUT_H, OUT_W), np.nan, np.float32)
         reproject(rsrc.read(), risk, src_transform=rsrc.transform, src_crs=rsrc.crs,
                   dst_transform=dst_transform, dst_crs=rsrc.crs,
                   src_nodata=np.nan, dst_nodata=np.nan, resampling=Resampling.nearest)
 
     with rasterio.open(s2_path) as ssrc:
-        s2 = np.zeros((3, h, TARGET_W), np.float32)
+        s2 = np.zeros((3, OUT_H, OUT_W), np.float32)
         reproject(ssrc.read(), s2, src_transform=ssrc.transform, src_crs=ssrc.crs,
                   dst_transform=dst_transform, dst_crs=ssrc.crs,
                   resampling=Resampling.bilinear)
-    return risk, s2, dst_transform, (b.left, b.right, b.bottom, b.top)
+    return risk, s2, dst_transform, (l, r, b, t)
 
 
 def composite(risk, s2):
@@ -129,14 +148,17 @@ def add_legend(ax):
 
 def main():
     plt.rcParams["font.family"] = ["Arial", "DejaVu Sans"]
-    fig, axes = plt.subplots(2, 2, figsize=(7.2, 6.6))
+    fig, axes = plt.subplots(2, 2, figsize=(7.2, 5.4))
 
     for ax, city in zip(axes.ravel(), CITIES):
         risk_p = TIF_DIR / f"{city}_risk_2026-7.tif"
         s2_p = TIF_DIR / f"{city}_s2rgb_2026-7.tif"
         risk, s2, _, extent = build_grid(risk_p, s2_p)
         rgb = composite(risk, s2)
-        ax.imshow(rgb, extent=extent, origin="upper", interpolation="nearest")
+        # aspect="auto" makes every panel fill its equal grid cell, so all four share
+        # identical height and width; extents are pre-cropped to the common aspect so
+        # the maps are not distorted relative to one another
+        ax.imshow(rgb, extent=extent, origin="upper", interpolation="nearest", aspect="auto")
         ax.set_xlim(extent[0], extent[1]); ax.set_ylim(extent[2], extent[3])
 
         lon, lat = CITY_CENTER[city]
