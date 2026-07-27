@@ -29,12 +29,22 @@ BASE = Path(__file__).resolve().parents[2]
 TIF_DIR = BASE / "data" / "fig4_tiffs_2026-7" / "fig4_tiffs_2026-7"
 OUT_DIR = BASE / "figures"
 
+# Fallback for panels whose (very large) Sentinel-2 export is no longer on disk.
+# Shanghai_s2rgb_2026-7.tif (~2.1 GB) was removed during cleanup, so its finished
+# panel is reused from a cached render instead of being recomposited. The cached
+# panel already has its legend, scale bar, and city-center marker burned in, so
+# those overlays are not redrawn for it. To rebuild such a panel from scratch,
+# re-download the missing GeoTIFF from the Drive folder fig4_tiffs_2026-7 and
+# delete the corresponding cache file.
+PANEL_CACHE = BASE / "data" / "fig4_panel_cache"
+
 CITIES = ["Shanghai", "Guangzhou", "Bangkok", "Dhaka"]
 PANEL_LABEL = {"Shanghai": "(a) Shanghai", "Guangzhou": "(b) Guangzhou",
                "Bangkok": "(c) Bangkok", "Dhaka": "(d) Dhaka"}
 CITY_CENTER = {  # lon, lat of the yellow triangle
     "Shanghai": (121.47, 31.23), "Guangzhou": (113.26, 23.13),
-    "Bangkok": (100.50, 13.75), "Dhaka": (90.41, 23.81),
+    # Bangkok nudged ~one marker width (0.05 deg lon) east per author check
+    "Bangkok": (100.55, 13.75), "Dhaka": (90.41, 23.81),
 }
 # all four panels are rendered to this identical pixel grid so they share height and
 # width; each city's extent is cropped (centered) to the common display aspect first
@@ -153,24 +163,33 @@ def main():
     for ax, city in zip(axes.ravel(), CITIES):
         risk_p = TIF_DIR / f"{city}_risk_2026-7.tif"
         s2_p = TIF_DIR / f"{city}_s2rgb_2026-7.tif"
-        risk, s2, _, extent = build_grid(risk_p, s2_p)
-        rgb = composite(risk, s2)
+        cache_p = PANEL_CACHE / f"{city}_panel_rendered.png"
+        burned_in = not s2_p.exists() and cache_p.exists()
+
+        if burned_in:
+            rgb = plt.imread(cache_p)
+            with rasterio.open(risk_p) as rsrc:
+                l, b, r, t = crop_to_aspect(tuple(rsrc.bounds))
+            extent = (l, r, b, t)
+        else:
+            risk, s2, _, extent = build_grid(risk_p, s2_p)
+            rgb = composite(risk, s2)
         # aspect="auto" makes every panel fill its equal grid cell, so all four share
         # identical height and width; extents are pre-cropped to the common aspect so
         # the maps are not distorted relative to one another
         ax.imshow(rgb, extent=extent, origin="upper", interpolation="nearest", aspect="auto")
         ax.set_xlim(extent[0], extent[1]); ax.set_ylim(extent[2], extent[3])
 
-        lon, lat = CITY_CENTER[city]
-        ax.plot(lon, lat, marker="v", ms=11, mfc="#ffdd00", mec="black", mew=1.0, zorder=7)
-
-        add_legend(ax)
-        scalebar_km(ax, extent)
+        if not burned_in:   # cached panels already carry these overlays
+            lon, lat = CITY_CENTER[city]
+            ax.plot(lon, lat, marker="v", ms=11, mfc="#ffdd00", mec="black", mew=1.0, zorder=7)
+            add_legend(ax)
+            scalebar_km(ax, extent)
         ax.set_title(PANEL_LABEL[city], fontsize=10, loc="left", fontweight="bold", pad=3)
         ax.set_xticks([]); ax.set_yticks([])
         for s in ax.spines.values():
             s.set_edgecolor("0.4"); s.set_linewidth(0.6)
-        print(f"composed {city}: {rgb.shape[1]}x{rgb.shape[0]}")
+        print(f"composed {city}: {rgb.shape[1]}x{rgb.shape[0]}" + (" [cached panel]" if burned_in else ""))
 
     fig.tight_layout(h_pad=1.2, w_pad=0.8)
     for ext in ("png", "pdf"):
