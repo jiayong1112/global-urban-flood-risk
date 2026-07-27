@@ -72,6 +72,10 @@ def draw_arrow(ax, x_pre, x_post, y, color):
 def draw_panel(ax, data, title, xlabel, style, log=False):
     n = len(ORDER)
     off = 0.19
+    ax.set_axisbelow(True)   # keeps the row bands under the grid lines
+    for i in range(0, n, 2):  # light grey band on alternating rows
+        ax.axhspan(n - 1 - i - 0.5, n - 1 - i + 0.5,
+                   facecolor="0.945", edgecolor="none", zorder=0)
     for i, rgn in enumerate(ORDER):
         y = n - 1 - i
         row = data.loc[rgn]

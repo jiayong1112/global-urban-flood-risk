@@ -67,6 +67,10 @@ def panel_a_shares():
 def draw_panel(ax, data, order, title, xlabel, log=False):
     n = len(order)
     off = 0.19
+    ax.set_axisbelow(True)   # keeps the row bands under the grid lines
+    for i in range(0, n, 2):  # light grey band on alternating rows
+        ax.axhspan(n - 1 - i - 0.5, n - 1 - i + 0.5,
+                   facecolor="0.945", edgecolor="none", zorder=0)
     for i, rgn in enumerate(order):
         y = n - 1 - i
         row = data.loc[rgn]
