@@ -5,9 +5,12 @@ Aggregate FUA-level data to country level:
 - For GDP metrics: calculate sum across FUAs in each country
 """
 
-import pandas as pd
 import os
 from pathlib import Path
+
+import pandas as pd
+
+from region_map import REGION_MAP
 
 # Define paths
 BASE_DIR = Path("/Users/jiayongliang/Documents/Trae/inAbove_Flood_SR/Scientific Reports/2026-1 submission")
@@ -19,67 +22,14 @@ CONTINENTS = ["Africa", "Asia", "CSAmerica", "Europe", "NAmerica", "Oceania"]
 
 def get_region_mapping():
     """
-    Map countries to regions based on geographical location
+    Map countries to regions based on geographical location.
+
+    The mapping itself lives in region_map.py, which is the single
+    authoritative copy shared by every script in this repository. It was
+    inlined here until 2026-08; that copy placed Russia in Central Asia,
+    disagreeing with Table S2 and with the reported regional results.
     """
-    region_map = {
-        # Africa
-        'Algeria': 'Africa', 'Angola': 'Africa', 'Benin': 'Africa', 'BurkinaFaso': 'Africa',
-        'Cameroon': 'Africa', 'Chad': 'Africa', 'CotedIvoire': 'Africa', 'Egypt': 'Africa',
-        'Ethiopia': 'Africa', 'Ghana': 'Africa', 'Kenya': 'Africa', 'Libya': 'Africa',
-        'Mali': 'Africa', 'Morocco': 'Africa', 'Mozambique': 'Africa', 'Nigeria': 'Africa',
-        'SouthAfrica': 'Africa', 'Tanzania': 'Africa', 'Tunisia': 'Africa', 'Uganda': 'Africa',
-        'Zambia': 'Africa', 'Zimbabwe': 'Africa', 'Senegal': 'Africa', 'Congo(DRC)': 'Africa',
-        'Sudan': 'Africa', 'Madagascar': 'Africa',
-
-        # Europe
-        'Austria': 'Europe', 'Belgium': 'Europe', 'Bulgaria': 'Europe', 'Croatia': 'Europe',
-        'CzechRepublic': 'Europe', 'Denmark': 'Europe', 'Finland': 'Europe', 'France': 'Europe',
-        'Germany': 'Europe', 'Greece': 'Europe', 'Hungary': 'Europe', 'Ireland': 'Europe',
-        'Italy': 'Europe', 'Netherlands': 'Europe', 'Norway': 'Europe', 'Poland': 'Europe',
-        'Portugal': 'Europe', 'Romania': 'Europe', 'Serbia': 'Europe', 'Slovakia': 'Europe',
-        'Spain': 'Europe', 'Sweden': 'Europe', 'Switzerland': 'Europe', 'Ukraine': 'Europe',
-        'UnitedKingdom': 'Europe', 'UnitedKingdom(Scotland)': 'Europe',
-
-        # North America
-        'Canada': 'N America', 'UnitedStates': 'N America', 'Mexico': 'N America',
-
-        # Central America
-        'CostaRica': 'C America', 'DominicanRepublic': 'C America', 'ElSalvador': 'C America',
-        'Guatemala': 'C America', 'Honduras': 'C America', 'Nicaragua': 'C America', 'Panama': 'C America',
-
-        # South America
-        'Argentina': 'S America', 'Bolivia': 'S America', 'Brazil': 'S America',
-        'Chile': 'S America', 'Colombia': 'S America', 'Ecuador': 'S America',
-        'Paraguay': 'S America', 'Peru': 'S America', 'Uruguay': 'S America', 'Venezuela': 'S America',
-
-        # East Asia
-        'China': 'E Asia', 'Japan': 'E Asia', 'NorthKorea': 'E Asia', 'SouthKorea': 'E Asia',
-        'Taiwan': 'E Asia', 'Mongolia': 'E Asia',
-
-        # Southeast Asia
-        'Cambodia': 'SE Asia', 'Indonesia': 'SE Asia', 'Laos': 'SE Asia', 'Malaysia': 'SE Asia',
-        'Myanmar': 'SE Asia', 'Philippines': 'SE Asia', 'Singapore': 'SE Asia', 'Thailand': 'SE Asia',
-        'Vietnam': 'SE Asia', 'Brunei': 'SE Asia',
-
-        # South Asia
-        'Afghanistan': 'S Asia', 'Bangladesh': 'S Asia', 'India': 'S Asia',
-        'Nepal': 'S Asia', 'Pakistan': 'S Asia', 'SriLanka': 'S Asia',
-
-        # Southwest Asia (Middle East)
-        'Iran': 'SW Asia', 'Iraq': 'SW Asia', 'Israel': 'SW Asia', 'Jordan': 'SW Asia',
-        'Lebanon': 'SW Asia', 'Oman': 'SW Asia', 'SaudiArabia': 'SW Asia', 'Syria': 'SW Asia',
-        'Turkey': 'SW Asia', 'UnitedArabEmirates': 'SW Asia', 'Yemen': 'SW Asia',
-        'Kuwait': 'SW Asia', 'Qatar': 'SW Asia', 'Bahrain': 'SW Asia',
-
-        # Central Asia
-        'Kazakhstan': 'C Asia', 'Kyrgyzstan': 'C Asia', 'Russia': 'C Asia',
-        'Tajikistan': 'C Asia', 'Turkmenistan': 'C Asia', 'Uzbekistan': 'C Asia',
-
-        # Oceania
-        'Australia': 'Oceania', 'NewZealand': 'Oceania', 'PapuaNewGuinea': 'Oceania',
-        'Fiji': 'Oceania',
-    }
-    return region_map
+    return dict(REGION_MAP)
 
 def combine_fua_files(file_pattern, is_gdp=False):
     """Combine FUA files from all continents"""

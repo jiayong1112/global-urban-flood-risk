@@ -13,8 +13,13 @@ against the numbers reported in the manuscript (Fig 1b: East Asia $296B/67%,
 SE Asia $31B, Europe $27B, S Asia $24B).
 """
 
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+
+# The country-to-region mapping is shared with every script in this repository;
+# see region_map.py for the Russia/Caribbean provenance note.
+from region_map import REGION_MAP
 
 BASE = Path(__file__).resolve().parents[2]
 SRC_1_17 = BASE / "2026-1_inAbove_Flood_SR" / "Scientific Reports" / "2026-1 submission" / "csv_fua_2026-1-17"
@@ -23,46 +28,6 @@ OUT_DIR = BASE / "data"
 
 CONTINENT_FILES = ["Africa", "Asia", "CSAmerica", "Europe", "NAmerica", "Oceania"]
 METRICS = ["exDmg_sum", "exDmg_pros_sum", "exInunD_sum", "exInunD_pros_sum"]
-
-# Country -> world region mapping, copied from combine_fua_data.py (Jan 2026)
-# so regions match the published figures; extended where FUAs were unmapped.
-REGION_MAP = {
-    'Algeria': 'Africa', 'Angola': 'Africa', 'Benin': 'Africa', 'BurkinaFaso': 'Africa',
-    'Cameroon': 'Africa', 'Chad': 'Africa', 'CotedIvoire': 'Africa', 'Egypt': 'Africa',
-    'Ethiopia': 'Africa', 'Ghana': 'Africa', 'Kenya': 'Africa', 'Libya': 'Africa',
-    'Mali': 'Africa', 'Morocco': 'Africa', 'Mozambique': 'Africa', 'Nigeria': 'Africa',
-    'SouthAfrica': 'Africa', 'Tanzania': 'Africa', 'Tunisia': 'Africa', 'Uganda': 'Africa',
-    'Zambia': 'Africa', 'Zimbabwe': 'Africa', 'Senegal': 'Africa', 'Congo(DRC)': 'Africa',
-    'Sudan': 'Africa', 'Madagascar': 'Africa',
-    'Austria': 'Europe', 'Belgium': 'Europe', 'Bulgaria': 'Europe', 'Croatia': 'Europe',
-    'CzechRepublic': 'Europe', 'Denmark': 'Europe', 'Finland': 'Europe', 'France': 'Europe',
-    'Germany': 'Europe', 'Greece': 'Europe', 'Hungary': 'Europe', 'Ireland': 'Europe',
-    'Italy': 'Europe', 'Netherlands': 'Europe', 'Norway': 'Europe', 'Poland': 'Europe',
-    'Portugal': 'Europe', 'Romania': 'Europe', 'Serbia': 'Europe', 'Slovakia': 'Europe',
-    'Spain': 'Europe', 'Sweden': 'Europe', 'Switzerland': 'Europe', 'Ukraine': 'Europe',
-    'UnitedKingdom': 'Europe', 'UnitedKingdom(Scotland)': 'Europe',
-    'Canada': 'N America', 'UnitedStates': 'N America', 'Mexico': 'N America',
-    'CostaRica': 'C America', 'DominicanRepublic': 'C America', 'ElSalvador': 'C America',
-    'Guatemala': 'C America', 'Honduras': 'C America', 'Nicaragua': 'C America', 'Panama': 'C America',
-    'Argentina': 'S America', 'Bolivia': 'S America', 'Brazil': 'S America',
-    'Chile': 'S America', 'Colombia': 'S America', 'Ecuador': 'S America',
-    'Paraguay': 'S America', 'Peru': 'S America', 'Uruguay': 'S America', 'Venezuela': 'S America',
-    'China': 'E Asia', 'Japan': 'E Asia', 'NorthKorea': 'E Asia', 'SouthKorea': 'E Asia',
-    'Taiwan': 'E Asia', 'Mongolia': 'E Asia',
-    'Cambodia': 'SE Asia', 'Indonesia': 'SE Asia', 'Laos': 'SE Asia', 'Malaysia': 'SE Asia',
-    'Myanmar': 'SE Asia', 'Philippines': 'SE Asia', 'Singapore': 'SE Asia', 'Thailand': 'SE Asia',
-    'Vietnam': 'SE Asia', 'Brunei': 'SE Asia',
-    'Afghanistan': 'S Asia', 'Bangladesh': 'S Asia', 'India': 'S Asia',
-    'Nepal': 'S Asia', 'Pakistan': 'S Asia', 'SriLanka': 'S Asia',
-    'Iran': 'SW Asia', 'Iraq': 'SW Asia', 'Israel': 'SW Asia', 'Jordan': 'SW Asia',
-    'Lebanon': 'SW Asia', 'Oman': 'SW Asia', 'SaudiArabia': 'SW Asia', 'Syria': 'SW Asia',
-    'Turkey': 'SW Asia', 'UnitedArabEmirates': 'SW Asia', 'Yemen': 'SW Asia',
-    'Kuwait': 'SW Asia', 'Qatar': 'SW Asia', 'Bahrain': 'SW Asia',
-    'Kazakhstan': 'C Asia', 'Kyrgyzstan': 'C Asia', 'Russia': 'C Asia',
-    'Tajikistan': 'C Asia', 'Turkmenistan': 'C Asia', 'Uzbekistan': 'C Asia',
-    'Australia': 'Oceania', 'NewZealand': 'Oceania', 'PapuaNewGuinea': 'Oceania',
-    'Fiji': 'Oceania',
-}
 
 
 def load_numerator():
