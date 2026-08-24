@@ -35,9 +35,10 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-BASE = Path(__file__).resolve().parents[2]
-SRC = BASE / "2026-1_inAbove_Flood_SR" / "Scientific Reports" / "2026-1 submission" / "csv_fua_2026-1-17"
-OUT = Path(__file__).resolve().parent
+import paths
+
+SRC = paths.FUA_2026_01
+OUT = paths.OUTPUT
 
 REGIONS = ["Africa", "Asia", "CSAmerica", "Europe", "NAmerica", "Oceania"]
 DATASETS = ["JRC", "WSF3D", "GBH2020"]
@@ -111,7 +112,7 @@ def main() -> None:
 
     print(f"\n  FUAs present in all three datasets            : {len(merged)}")
     print(f"  ...with finite height and IR-AED in all three : {len(clean)}")
-    clean.to_csv(OUT / "a1_comparison_by_eFUA_ID.csv", index=False)
+    clean.to_csv(paths.out("a1_comparison_by_eFUA_ID.csv"), index=False)
 
     # ---- 1. Dataset-wide means (the basis of the manuscript's 27.7% CV) ----
     print("\n" + "-" * 78)
@@ -201,11 +202,11 @@ def main() -> None:
         "GBH2020": [h_means[2], fd_means[2] * 100, ir_means[2] * 100],
         "between_dataset_CV_pct": [h_cv, fd_cv, ir_cv],
     })
-    summary.to_csv(OUT / "a1_summary.csv", index=False)
+    summary.to_csv(paths.out("a1_height_sensitivity_summary_2026-08.csv"), index=False)
     pd.DataFrame({"eFUA_ID": clean["eFUA_ID"], "eFUA_name": clean["eFUA_name"],
                   "Cntry_name": clean["Cntry_name"],
                   "per_fua_cv_pct": per_fua_cv}).to_csv(
-        OUT / "a1_per_fua_cv.csv", index=False)
+        paths.out("a1_height_sensitivity_per_fua_2026-08.csv"), index=False)
 
     print("\nWrote a1_summary.csv, a1_per_fua_cv.csv, a1_comparison_by_eFUA_ID.csv")
 

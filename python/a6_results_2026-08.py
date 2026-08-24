@@ -22,16 +22,14 @@ import sys
 import numpy as np
 import pandas as pd
 
-HERE = Path(__file__).resolve().parent
-BASE = HERE.parents[1]
-sys.path.insert(0, str(BASE / "revision-2026-08" / "figures"))
+import paths
 from region_map import REGION_MAP  # noqa: E402
 
 FD, FDP, FDC = "exDmg_mean", "exDmg_pros_mean", "exDmg_cmp_mean"
 IR, IRP, IRC = "exInunD_mean", "exInunD_pros_mean", "exInunD_cmp_mean"
 
-fua = pd.read_csv(HERE / "a5_fua_2026-08.csv")
-cty = pd.read_csv(HERE / "a5_country_2026-08.csv")
+fua = pd.read_csv(paths.table("a5_fua_2026-08.csv"))
+cty = pd.read_csv(paths.table("a5_country_2026-08.csv"))
 iqr = lambda s: s.quantile(.75) - s.quantile(.25)
 pc = lambda x: 100 * x
 
@@ -59,7 +57,7 @@ sh.columns = ["FD", "IR", "FD_P", "IR_P"]
 out = sh.copy()
 out["IR_vs_FD_%"] = (sh.IR - sh.FD) / sh.FD * 100
 print(out.round(2).to_string())
-sh.round(4).to_csv(HERE / "a6_fig1_panelA_2026-08.csv")
+sh.round(4).to_csv(paths.out("fig1_panelA_shares_2026-08.csv"))
 
 alt = shares(fua, [FDC, IRC, FDP, IRP])
 alt.columns = ["FD", "IR", "FD_P", "IR_P"]

@@ -19,10 +19,11 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 from pathlib import Path
 
-BASE = Path(__file__).resolve().parents[2]
-CTY_CSV = BASE / "2026-1_inAbove_Flood_SR" / "Scientific Reports" / "2026-1 submission" / "fua_world_countries_2026-1-8.csv"
-SHP = BASE / "data" / "ne_110m_admin_0_countries" / "ne_110m_admin_0_countries.shp"
-OUT_DIR = BASE / "figures"
+import paths
+
+CTY_CSV = paths.EXPORTS / "fua_world_countries_2026-1-8.csv"
+SHP = paths.NATURAL_EARTH
+OUT_DIR = paths.OUTPUT
 
 # ColorBrewer YlOrRd 3-class (sequential, CVD-safe) + no-data gray
 TERTILE_COLORS = ["#ffeda0", "#feb24c", "#f03b20"]
@@ -72,7 +73,7 @@ def main():
     d = (cty.tert_IR - cty.tert_FD)[valid]
     print(f"tertile shifts (n={valid.sum()}): lower={(d < 0).sum()} higher={(d > 0).sum()} same={(d == 0).sum()}")
 
-    world = gpd.read_file(SHP)[["ADMIN", "geometry"]]
+    world = gpd.read_file(paths.need(SHP))[["ADMIN", "geometry"]]
     world = world[world.ADMIN != "Antarctica"]
     merged = world.merge(cty[["ne_name", "tert_FD", "tert_IR"]],
                          left_on="ADMIN", right_on="ne_name", how="left")

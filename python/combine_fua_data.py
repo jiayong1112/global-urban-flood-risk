@@ -13,9 +13,12 @@ import pandas as pd
 from region_map import REGION_MAP
 
 # Define paths
-BASE_DIR = Path("/Users/jiayongliang/Documents/Trae/inAbove_Flood_SR/Scientific Reports/2026-1 submission")
-FUA_DIR = BASE_DIR / "csv_fua_2026-1-8"
-OUTPUT_DIR = BASE_DIR
+import paths
+
+# The January per-FUA exports. This was an absolute path on the original
+# author machine until 2026-08 and could not run anywhere else.
+FUA_DIR = paths.FUA_2026_01
+OUTPUT_DIR = paths.OUTPUT
 
 # List of continents
 CONTINENTS = ["Africa", "Asia", "CSAmerica", "Europe", "NAmerica", "Oceania"]

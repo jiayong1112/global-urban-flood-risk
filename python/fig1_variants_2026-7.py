@@ -23,9 +23,10 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import FancyArrowPatch
 from pathlib import Path
 
-BASE = Path(__file__).resolve().parents[2]
-OUT_DIR = BASE / "figures"
-REGION_CSV = BASE / "data" / "gdp_normalized_region_2026-7.csv"
+import paths
+
+OUT_DIR = paths.OUTPUT
+REGION_CSV = paths.DATA / "gdp_normalized_region_2026-7.csv"
 
 # reuse the existing Figure 1 module (hyphenated filename -> load by path)
 _spec = importlib.util.spec_from_file_location(

@@ -17,8 +17,11 @@ plt.style.use('seaborn-v0_8-darkgrid')
 sns.set_palette("husl")
 
 # Data directory
-data_dir = '/Users/jiayongliang/Documents/Trae/inAbove_Flood_SR/Scientific Reports/2026-1 submission/csv_fua_2026-1-17/'
-output_dir = '/Users/jiayongliang/Documents/Trae/inAbove_Flood_SR/Scientific Reports/2026-1 submission/figures/'
+import paths
+
+# Absolute paths on the original author machine until 2026-08.
+data_dir = str(paths.FUA_2026_01) + os.sep
+output_dir = str(paths.OUTPUT) + os.sep
 
 # Regions to process
 regions = ['Africa', 'Asia', 'CSAmerica', 'Europe', 'NAmerica', 'Oceania']
@@ -106,7 +109,7 @@ print(f"FUAs after removing missing values: {len(comparison_clean)}")
 print()
 
 # Save comparison dataset
-comparison_clean.to_csv(os.path.join(data_dir, '../dataset_comparison_2026-1-17.csv'), index=False)
+comparison_clean.to_csv(paths.out('dataset_comparison_2026-1-17.csv'), index=False)
 print(f"Saved comparison dataset to: dataset_comparison_2026-1-17.csv")
 print()
 

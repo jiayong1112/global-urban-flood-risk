@@ -24,21 +24,18 @@ Run:  python a4_rebuild_2026-08.py
 """
 
 from pathlib import Path
-import re
 
 import numpy as np
 import pandas as pd
 
-HERE = Path(__file__).resolve().parent
-BASE = HERE.parents[1]
-SUB = BASE / "2026-1_inAbove_Flood_SR" / "Scientific Reports" / "2026-1 submission"
+import paths
 
 # Region mapping reused verbatim from the published figure code, so regions
 # match the previously published figures.
-_txt = (BASE / "code" / "figures" / "compute_gdp_normalized_2026-7.py").read_text(encoding="utf-8")
-_ns = {}
-exec(re.search(r"REGION_MAP = \{.*?\n\}", _txt, re.S).group(0), _ns)
-REGION_MAP = _ns["REGION_MAP"]
+# Superseded by a5_assemble_2026-08.py. This script grouped countries with the
+# pre-correction mapping (Russia in Central Asia), which is why its regional
+# shares differ from the reported ones; it is retained for provenance.
+from region_map import PUBLISHED_REGION_MAP as REGION_MAP
 
 FD, IR, FDP, IRP = "FD_AED", "IR_AED", "FD_AED_P", "IR_AED_P"
 RENAME = {"exDmg_tail_mean": FD, "exInunD_tail_mean": IR,
@@ -47,7 +44,7 @@ METS = [FD, FDP, IR, IRP]
 
 
 def build():
-    d = pd.read_csv(HERE / "a3_diag_JRC.csv").rename(columns=RENAME)
+    d = pd.read_csv(paths.table("a3_diag_JRC_2026-08.csv")).rename(columns=RENAME)
     d["wld_rgn"] = d["Cntry_name"].map(REGION_MAP)
     unmapped = sorted(d.loc[d.wld_rgn.isna(), "Cntry_name"].dropna().unique())
     if unmapped:
@@ -76,13 +73,13 @@ def main():
     fua, cty = build()
     print(f"  {len(fua)} FUAs, {len(cty)} countries, {fua.wld_rgn.nunique()} regions")
 
-    fua.to_csv(HERE / "a4_fua_2026-08.csv", index=False)
-    cty.to_csv(HERE / "a4_country_2026-08.csv", index=False)
+    fua.to_csv(paths.out("a4_fua_2026-08.csv"), index=False)
+    cty.to_csv(paths.out("a4_country_2026-08.csv"), index=False)
 
     # ---- Figure 1a: FUA -> country mean -> region mean, share of global -----
     reg = cty.groupby("wld_rgn")[METS].mean()
     sh = 100 * reg / reg.sum()
-    sh.to_csv(HERE / "a4_fig1_panelA_2026-08.csv")
+    sh.to_csv(paths.out("a4_fig1_panelA_2026-08.csv"))
     print("\n" + "-" * 74)
     print("Figure 1a - share of global total (%)")
     print("-" * 74)

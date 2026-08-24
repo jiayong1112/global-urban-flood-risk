@@ -25,9 +25,10 @@ from matplotlib.patches import Rectangle
 from matplotlib.lines import Line2D
 from pathlib import Path
 
-BASE = Path(__file__).resolve().parents[2]
-TIF_DIR = BASE / "data" / "fig4_tiffs_2026-7" / "fig4_tiffs_2026-7"
-OUT_DIR = BASE / "figures"
+import paths
+
+TIF_DIR = paths.FIG4_TIFFS
+OUT_DIR = paths.OUTPUT
 
 # Fallback for panels whose (very large) Sentinel-2 export is no longer on disk.
 # Shanghai_s2rgb_2026-7.tif (~2.1 GB) was removed during cleanup, so its finished
@@ -36,7 +37,7 @@ OUT_DIR = BASE / "figures"
 # those overlays are not redrawn for it. To rebuild such a panel from scratch,
 # re-download the missing GeoTIFF from the Drive folder fig4_tiffs_2026-7 and
 # delete the corresponding cache file.
-PANEL_CACHE = BASE / "data" / "fig4_panel_cache"
+PANEL_CACHE = paths.DATA / "fig4_panel_cache"
 
 CITIES = ["Shanghai", "Guangzhou", "Bangkok", "Dhaka"]
 PANEL_LABEL = {"Shanghai": "(a) Shanghai", "Guangzhou": "(b) Guangzhou",

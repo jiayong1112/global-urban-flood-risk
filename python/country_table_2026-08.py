@@ -28,9 +28,8 @@ import pandas as pd
 from region_map import REGION_MAP
 
 HERE = Path(__file__).resolve().parent
-BASE = HERE.parents[1]
-SUB = BASE / "2026-1_inAbove_Flood_SR" / "Scientific Reports" / "2026-1 submission"
-SRC = SUB / "csv_fua_2026-1-17"
+import paths
+SRC = paths.FUA_2026_01
 
 METS = ["exDmg_mean", "exDmg_pros_mean", "exInunD_mean", "exInunD_pros_mean"]
 
@@ -49,7 +48,7 @@ def load_fua():
 
 def main():
     fua = load_fua()
-    pub = pd.read_csv(SUB / "fua_world_countries_2026-1-8.csv")
+    pub = pd.read_csv(paths.EXPORTS / "fua_world_countries_2026-1-8.csv")
     pub["source"] = "2026-1-8 (published)"
 
     have = set(pub.country_na)
@@ -68,7 +67,7 @@ def main():
         print(f"[warn] still unmapped: {unmapped}")
 
     out = out.dropna(subset=["wld_rgn"])
-    out.to_csv(HERE / "country_table_2026-08.csv", index=False)
+    out.to_csv(paths.out("country_table_2026-08.csv"), index=False)
 
     print(f"countries: {len(pub)} published + {len(add)} added = {len(out)}")
     print(f"added: {', '.join(add.country_na)}")

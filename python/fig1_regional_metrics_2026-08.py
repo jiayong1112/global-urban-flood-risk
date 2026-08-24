@@ -22,10 +22,7 @@ from pathlib import Path
 
 from region_map import REGION_MAP, PUBLISHED_REGION_MAP, DISPLAY
 
-HERE = Path(__file__).resolve().parent
-BASE = HERE.parents[1]
-SRC = BASE / "2026-1_inAbove_Flood_SR" / "Scientific Reports" / "2026-1 submission" / "csv_fua_2026-1-17"
-PUBLISHED_PANEL_A = BASE / "data" / "fig1_panelA_shares_2026-7.csv"
+import paths
 
 METS = ["exDmg_mean", "exInunD_mean", "exDmg_pros_mean", "exInunD_pros_mean"]
 COL = {"FD": "#0072B2", "FD_P": "#56B4E9", "IR": "#D55E00", "IR_P": "#E69F00"}
@@ -34,7 +31,7 @@ COL = {"FD": "#0072B2", "FD_P": "#56B4E9", "IR": "#D55E00", "IR_P": "#E69F00"}
 def load_fua():
     """The 2026-08 export: symmetric rare-event tail, FLOPROS masking, and the
     9 FUAs the January export had dropped (Mexico City among them)."""
-    return pd.read_csv(BASE / "revision-2026-08" / "analysis" / "a5_fua_2026-08.csv")
+    return pd.read_csv(paths.table("a5_fua_2026-08.csv"))
 
 
 def panel_a(f, mapping):
@@ -85,7 +82,7 @@ def main():
     f = load_fua()
 
     a, n_new, cty_counts = panel_a(f, REGION_MAP)
-    a.round(4).to_csv(HERE / "fig1_panelA_shares_2026-08.csv")
+    a.round(4).to_csv(paths.out("fig1_panelA_shares_2026-08.csv"))
     print(f"\ncorrected panel (a)  (n = {n_new} FUAs)")
     print(a.round(2).to_string())
     print("\ncountries per region:")
@@ -101,7 +98,7 @@ def main():
               f"({(a.IR[r]-a.FD[r])/a.FD[r]*100:+.0f}% relative; "
               f"depth-only is {(a.FD[r]-a.IR[r])/a.IR[r]*100:+.0f}% of IR)")
 
-    r = pd.read_csv(HERE / "gdp_normalized_region_2026-08b.csv", index_col=0)
+    r = pd.read_csv(paths.table("gdp_normalized_region_2026-08b.csv"), index_col=0)
     b = pd.DataFrame({"FD": r["exDmg_bnUSD"], "FD_P": r["exDmg_pros_bnUSD"],
                       "IR": r["exInunD_bnUSD"], "IR_P": r["exInunD_pros_bnUSD"]})
     c = pd.DataFrame({"FD": r["exDmg_pctGDP"], "FD_P": r["exDmg_pros_pctGDP"],
@@ -133,9 +130,9 @@ def main():
 
     fig.tight_layout(rect=(0, 0.05, 1, 1))
     for ext in ("png", "pdf"):
-        fig.savefig(HERE / f"Fig1_regional_metrics_2026-08.{ext}", dpi=300,
+        fig.savefig(paths.out(f"Fig1_regional_metrics_2026-08.{ext}"), dpi=300,
                     bbox_inches="tight", facecolor="white")
-    print("\nsaved", HERE / "Fig1_regional_metrics_2026-08.png")
+    print("\nsaved", paths.out("Fig1_regional_metrics_2026-08.png"))
 
 
 if __name__ == "__main__":

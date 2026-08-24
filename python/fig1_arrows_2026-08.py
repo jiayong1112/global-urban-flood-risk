@@ -23,8 +23,10 @@ from matplotlib.patches import FancyArrowPatch
 
 from region_map import REGION_MAP, DISPLAY
 
+import paths
+
 HERE = Path(__file__).resolve().parent
-REGION_CSV = HERE / "gdp_normalized_region_2026-08b.csv"
+REGION_CSV = paths.table("gdp_normalized_region_2026-08b.csv")
 
 _spec = importlib.util.spec_from_file_location(
     "fig1_2026_08", HERE / "fig1_regional_metrics_2026-08.py")
@@ -111,9 +113,9 @@ def main():
 
     fig.tight_layout(rect=(0, 0.10, 1, 1))
     for ext in ("png", "pdf"):
-        fig.savefig(HERE / f"Fig1_arrows_2026-08.{ext}", dpi=300,
+        fig.savefig(paths.out(f"Fig1_arrows_2026-08.{ext}"), dpi=300,
                     bbox_inches="tight", facecolor="white")
-    print("saved", HERE / "Fig1_arrows_2026-08.png")
+    print("saved", paths.out("Fig1_arrows_2026-08.png"))
 
 
 if __name__ == "__main__":

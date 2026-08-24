@@ -28,10 +28,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-BASE = Path(__file__).resolve().parents[2]
-SRC = BASE / "2026-1_inAbove_Flood_SR" / "Scientific Reports" / "2026-1 submission" / "csv_fua_2026-1-17"
-GDP_TOTAL = BASE / "data" / "fua_totalGDP_2026-7.csv"
-OUT = Path(__file__).resolve().parent
+import paths
+
+SRC = paths.FUA_2026_01
+GDP_TOTAL = paths.TOTAL_GDP_CSV
+OUT = paths.OUTPUT
 
 CITIES = ["Wuhan", "Bangkok", "Shanghai", "Dhaka", "Ho Chi Minh City",
           "Mandalay", "Hanoi", "Phnom Penh"]
@@ -103,7 +104,7 @@ def main() -> None:
             "exInunD_pros_mean", "exDmg_sum", "exDmg_pros_sum", "avoided_fd_usd",
             "avoided_fd_pctGDP", "exInunD_sum", "exInunD_pros_sum",
             "avoided_ir_usd", "avoided_ir_pctGDP"]
-    sel[cols].to_csv(OUT / "a2_decision_support.csv", index=False)
+    sel[cols].to_csv(paths.out("a2_decision_support_2026-08.csv"), index=False)
 
     # Global context: how large is the total modelled protection benefit?
     print("\n" + "-" * 100)

@@ -23,12 +23,10 @@ import sys
 import numpy as np
 import pandas as pd
 
-HERE = Path(__file__).resolve().parent
-BASE = HERE.parents[1]
-EXPORTS = HERE / "flood_fua_2026-08"
-PUB = BASE / "2026-1_inAbove_Flood_SR" / "Scientific Reports" / "2026-1 submission"
-sys.path.insert(0, str(BASE / "revision-2026-08" / "figures"))
-from region_map import REGION_MAP           # noqa: E402
+import paths
+from region_map import REGION_MAP
+
+EXPORTS = paths.FUA_2026_08
 
 FD, FDP = "exDmg_mean", "exDmg_pros_mean"
 IR, IRP = "exInunD_mean", "exInunD_pros_mean"
@@ -83,7 +81,7 @@ def main():
     # ---- reproduction against the published export ------------------------
     pubf = []
     for c in ["Africa", "Asia", "CSAmerica", "Europe", "NAmerica", "Oceania"]:
-        d = pd.read_csv(PUB / "csv_fua_2026-1-17" / f"JRC_{c}_FloodRisk.csv")
+        d = pd.read_csv(paths.FUA_2026_01 / f"JRC_{c}_FloodRisk.csv")
         for m in (FD, IR, FDP, IRP):
             if m not in d.columns:
                 b = m.replace("_mean", "")
@@ -124,8 +122,8 @@ def main():
     cty["n_fuas"] = fua.groupby(["Cntry_name", "wld_rgn"]).size().values
     cty = cty.rename(columns={"Cntry_name": "country_na"})
 
-    fua.to_csv(HERE / "a5_fua_2026-08.csv", index=False)
-    cty.to_csv(HERE / "a5_country_2026-08.csv", index=False)
+    fua.to_csv(paths.out("a5_fua_2026-08.csv"), index=False)
+    cty.to_csv(paths.out("a5_country_2026-08.csv"), index=False)
     print(f"\n  wrote a5_fua_2026-08.csv ({len(fua)} FUAs) and "
           f"a5_country_2026-08.csv ({len(cty)} countries)")
 

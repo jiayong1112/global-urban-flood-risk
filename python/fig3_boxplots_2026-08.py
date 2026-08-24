@@ -22,9 +22,7 @@ from pathlib import Path
 
 from region_map import REGION_MAP, PUBLISHED_REGION_MAP, DISPLAY
 
-HERE = Path(__file__).resolve().parent
-BASE = HERE.parents[1]
-SUB = BASE / "2026-1_inAbove_Flood_SR" / "Scientific Reports" / "2026-1 submission"
+import paths
 
 METS = ["exDmg_mean", "exDmg_pros_mean", "exInunD_mean", "exInunD_pros_mean"]
 MET_LABELS = ["FD-AED", "FD-AED\nafter protection", "IR-AED", "IR-AED\nafter protection"]
@@ -41,13 +39,13 @@ REGION_COLORS = {
 
 def load_country():
     """Extended country table (126 countries), built by country_table_2026-08.py."""
-    cty = pd.read_csv(BASE / "revision-2026-08" / "analysis" / "a5_country_2026-08.csv")
+    cty = pd.read_csv(paths.table("a5_country_2026-08.csv"))
     print(f"  country table: {len(cty)} countries (2026-08 export)")
     return cty.dropna(subset=["wld_rgn"])
 
 
 def load_fua():
-    f = pd.read_csv(BASE / "revision-2026-08" / "analysis" / "a5_fua_2026-08.csv")
+    f = pd.read_csv(paths.table("a5_fua_2026-08.csv"))
     return f.dropna(subset=["wld_rgn"])
 
 
@@ -111,9 +109,9 @@ def main():
 
     fig.tight_layout(rect=(0, 0.10, 1, 1))
     for ext in ("png", "pdf"):
-        fig.savefig(HERE / f"Fig3_boxplots_2026-08.{ext}", dpi=300,
+        fig.savefig(paths.out(f"Fig3_boxplots_2026-08.{ext}"), dpi=300,
                     bbox_inches="tight", facecolor="white")
-    print("\nsaved", HERE / "Fig3_boxplots_2026-08.png")
+    print("\nsaved", paths.out("Fig3_boxplots_2026-08.png"))
 
 
 if __name__ == "__main__":

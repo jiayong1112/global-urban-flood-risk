@@ -15,21 +15,18 @@ csv_fua_2026-1-17/JRC_*_FloodRisk.csv (633 FUAs; Oceania means from sum/count).
 
 import pandas as pd
 import numpy as np
-import re
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from pathlib import Path
 
-BASE = Path(__file__).resolve().parents[2]
-SUB = BASE / "2026-1_inAbove_Flood_SR" / "Scientific Reports" / "2026-1 submission"
-OUT_DIR = BASE / "figures"
+import paths
+OUT_DIR = paths.OUTPUT
 
-_txt = (BASE / "code" / "figures" / "compute_gdp_normalized_2026-7.py").read_text()
-_ns = {}
-exec(re.search(r"REGION_MAP = \{.*?\n\}", _txt, re.S).group(0), _ns)
-REGION_MAP = _ns["REGION_MAP"]
+# The July figures were drawn with the pre-correction grouping (Russia in
+# Central Asia). fig3_boxplots_2026-08.py uses the corrected map.
+from region_map import PUBLISHED_REGION_MAP as REGION_MAP
 
 METS = ["exDmg_mean", "exDmg_pros_mean", "exInunD_mean", "exInunD_pros_mean"]
 MET_LABELS = ["FD-AED", "FD-AED\nafter protection", "IR-AED", "IR-AED\nafter protection"]
@@ -51,14 +48,14 @@ DISPLAY = {
 
 
 def load_country():
-    cty = pd.read_csv(SUB / "fua_world_countries_2026-1-8.csv")
+    cty = pd.read_csv(paths.EXPORTS / "fua_world_countries_2026-1-8.csv")
     return cty.dropna(subset=["wld_rgn"])
 
 
 def load_fua():
     frames = []
     for c in ["Africa", "Asia", "CSAmerica", "Europe", "NAmerica", "Oceania"]:
-        df = pd.read_csv(SUB / "csv_fua_2026-1-17" / f"JRC_{c}_FloodRisk.csv")
+        df = pd.read_csv(paths.FUA_2026_01 / f"JRC_{c}_FloodRisk.csv")
         for m in METS:
             if m not in df.columns:
                 base = m.replace("_mean", "")

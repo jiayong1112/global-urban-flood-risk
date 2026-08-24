@@ -9,7 +9,7 @@ The script runs twice: once with the previously published mapping, to confirm
 it reproduces data/gdp_normalized_region_2026-7.csv exactly, and once with the
 corrected mapping, which is what the revised figures use.
 
-Outputs (revision-2026-08/figures/):
+Outputs (output/):
   gdp_normalized_region_2026-08.csv
   gdp_normalized_country_2026-08.csv
 """
@@ -22,10 +22,11 @@ import pandas as pd
 from region_map import REGION_MAP, PUBLISHED_REGION_MAP
 
 HERE = Path(__file__).resolve().parent
-BASE = HERE.parents[1]
-SRC = BASE / "2026-1_inAbove_Flood_SR" / "Scientific Reports" / "2026-1 submission" / "csv_fua_2026-1-17"
-TOTALGDP_CSV = BASE / "data" / "fua_totalGDP_2026-7.csv"
-PUBLISHED_REGION_CSV = BASE / "data" / "gdp_normalized_region_2026-7.csv"
+import paths
+
+SRC = paths.FUA_2026_01
+TOTALGDP_CSV = paths.TOTAL_GDP_CSV
+PUBLISHED_REGION_CSV = paths.DATA / "gdp_normalized_region_2026-7.csv"
 
 CONTINENTS = ["Africa", "Asia", "CSAmerica", "Europe", "NAmerica", "Oceania"]
 METRICS = ["exDmg_sum", "exDmg_pros_sum", "exInunD_sum", "exInunD_pros_sum"]
@@ -75,12 +76,12 @@ def main():
 
     # ---- corrected mapping -------------------------------------------------
     newr, d = region_table(m, REGION_MAP)
-    newr.to_csv(HERE / "gdp_normalized_region_2026-08.csv")
+    newr.to_csv(paths.out("gdp_normalized_region_2026-08.csv"))
 
     cty = d.groupby(["Cntry_name", "wld_rgn"])[METRICS + ["totalGDP"]].sum().reset_index()
     for met in METRICS:
         cty[met.replace("_sum", "_pctGDP")] = 100 * cty[met] / cty["totalGDP"]
-    cty.round(6).to_csv(HERE / "gdp_normalized_country_2026-08.csv", index=False)
+    cty.round(6).to_csv(paths.out("gdp_normalized_country_2026-08.csv"), index=False)
 
     print("\n=== GDP-weighted expected loss, corrected mapping ===")
     print(newr[["n_fuas", "exDmg_bnUSD", "exDmg_share_pct",
@@ -112,7 +113,7 @@ def main():
             ("S+SE Asia+Africa, FD-P", "exDmg_pros_bnUSD", poor)]:
         print(f"  {lbl:24s} {share(col, grp, old):5.1f}%  ->  {share(col, grp, newr):5.1f}%")
 
-    print(f"\nwrote {HERE / 'gdp_normalized_region_2026-08.csv'}")
+    print(f"\nwrote {paths.out('gdp_normalized_region_2026-08.csv')}")
 
 
 if __name__ == "__main__":

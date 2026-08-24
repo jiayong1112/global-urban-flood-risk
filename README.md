@@ -121,6 +121,7 @@ manuscript. The `*_2026-7.csv` tables are the superseded July versions.
 | Table S6 (residual FD-AED by candidate standard, all FUAs) | `data/a3_residual_vs_standard_2026-08.csv` |
 | Building-height sensitivity (Discussion) | `data/a1_height_sensitivity_summary_2026-08.csv`, `data/a1_height_sensitivity_per_fua_2026-08.csv` |
 | Avoided-loss illustration (Discussion) | `data/a2_decision_support_2026-08.csv` |
+| GDP denominator for the normalized metrics | `data/fua_totalGDP_2026-7.csv` |
 
 Sample sizes differ between tables because the available *n* varies by
 indicator: the assembled series holds 127 countries and 665 FUAs, of which 120
@@ -136,28 +137,60 @@ Huizinga et al. (2017) depth-damage functions; Kummu et al. (2025) gridded GDP p
 capita PPP; GHS-FUA and USDOS LSIB boundaries; Copernicus Sentinel-2 surface
 reflectance (Fig 4 basemap).
 
+## Repository layout
+
+Every script resolves its paths relative to the repository, so a fresh clone
+works with no editing. Three directories:
+
+| Directory | Tracked | Contents |
+|---|---|---|
+| `data/` | yes | The summary tables used for the manuscript |
+| `exports/` | no | Earth Engine exports you generate; see `exports/README.md` |
+| `output/` | no | Everything the scripts write: figures and regenerated tables |
+
+Set `GUFR_EXPORTS` if the exports already live elsewhere on your machine, and
+`GUFR_OUTPUT` to write results somewhere other than `output/`. Run
+`python python/paths.py` to print every location and whether it is present.
+
+Summary tables are read through a helper that prefers a copy you have just
+regenerated in `output/` and falls back to the deposited copy in `data/`. So the
+figure scripts draw the published figures from a bare clone, and redraw them
+from your own numbers once you have re-run the analysis.
+
 ## Reproducing the figures
 
 ```bash
 pip install pandas numpy scipy matplotlib geopandas rasterio pillow
 ```
 
-The GEE exports are not redistributed here; run the `*Export_*` scripts in the
-Earth Engine Code Editor and place the resulting CSVs where each script's header
-comment expects them. The Python scripts resolve their inputs relative to their
-own location, so run them from the directory they live in. Then:
+**From a bare clone, with no Earth Engine access.** These read the deposited
+tables in `data/`:
 
 ```bash
-python python/region_map.py                       # sanity-check the shared mapping
-python python/a5_assemble_2026-08.py              # assemble the FUA and country tables
-python python/compute_gdp_normalized_2026-08.py
-python python/a6_results_2026-08.py               # print every number quoted in the Results
-python python/a3_integration_diagnostics.py       # Tables S3-S7
+python python/region_map.py                  # print the shared mapping and its corrections
+python python/a6_results_2026-08.py          # every number quoted in the Results
 python python/fig1_regional_metrics_2026-08.py
-python python/fig2_tertile_maps_2026-08.py
 python python/fig3_boxplots_2026-08.py
-python python/fig4_city_maps_2026-7.py            # needs the Fig 4 GeoTIFFs from fig4_export_Jul2026.js
+python python/fig2_tertile_maps_2026-08.py   # also needs the Natural Earth basemap
 ```
+
+**Recomputing the tables from the Earth Engine exports.** Place the exports as
+described in `exports/README.md`, then:
+
+```bash
+python python/a5_assemble_2026-08.py         # FUA and country tables
+python python/a3_integration_diagnostics.py  # Tables S3-S7
+python python/compute_gdp_normalized_2026-08.py
+python python/a1_height_dataset_sensitivity.py
+python python/a2_decision_support_numbers.py
+python python/fig4_city_maps_2026-7.py       # needs the Fig 4 GeoTIFFs
+```
+
+Re-running `a5_assemble_2026-08.py` and `a3_integration_diagnostics.py` from the
+deposited Earth Engine exports reproduces `data/a5_fua_2026-08.csv`,
+`data/a5_country_2026-08.csv`, `data/a3_diag_JRC_2026-08.csv` and
+`data/a3_residual_vs_standard_2026-08.csv` exactly, to zero numerical
+difference.
 
 The GEE scripts run in the Earth Engine Code Editor and are also available at:
 https://code.earthengine.google.com/?scriptPath=users%2FJiayong_Liang%2Fpublic%3Aglobal_flood_risk

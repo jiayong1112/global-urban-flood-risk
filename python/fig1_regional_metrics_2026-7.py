@@ -17,23 +17,22 @@ Colors (Okabe-Ito, CVD-validated: all pairs dE >= 8 under protan/deutan/tritan s
 
 import pandas as pd
 import numpy as np
-import re
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from pathlib import Path
 
-BASE = Path(__file__).resolve().parents[2]
-SRC_1_17 = BASE / "2026-1_inAbove_Flood_SR" / "Scientific Reports" / "2026-1 submission" / "csv_fua_2026-1-17"
-REGION_CSV = BASE / "data" / "gdp_normalized_region_2026-7.csv"
-OUT_DIR = BASE / "figures"
+import paths
+
+SRC_1_17 = paths.FUA_2026_01
+REGION_CSV = paths.DATA / "gdp_normalized_region_2026-7.csv"
+OUT_DIR = paths.OUTPUT
 
 # reuse the region mapping from the normalization script
-_txt = (BASE / "code" / "figures" / "compute_gdp_normalized_2026-7.py").read_text()
-_ns = {}
-exec(re.search(r"REGION_MAP = \{.*?\n\}", _txt, re.S).group(0), _ns)
-REGION_MAP = _ns["REGION_MAP"]
+# The July figures were drawn with the pre-correction grouping (Russia in
+# Central Asia). fig1_regional_metrics_2026-08.py uses the corrected map.
+from region_map import PUBLISHED_REGION_MAP as REGION_MAP
 
 METS = ["exDmg_mean", "exInunD_mean", "exDmg_pros_mean", "exInunD_pros_mean"]
 COL = {"FD": "#0072B2", "FD_P": "#56B4E9", "IR": "#D55E00", "IR_P": "#E69F00"}
@@ -100,7 +99,7 @@ def main():
     plt.rcParams["font.family"] = ["Arial", "DejaVu Sans"]
 
     a = panel_a_shares()
-    a.round(4).to_csv(BASE / "data" / "fig1_panelA_shares_2026-7.csv")
+    a.round(4).to_csv(paths.out("fig1_panelA_shares_2026-7.csv"))
 
     r = pd.read_csv(REGION_CSV, index_col=0)
     b = pd.DataFrame({

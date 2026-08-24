@@ -21,10 +21,11 @@ import pandas as pd
 # see region_map.py for the Russia/Caribbean provenance note.
 from region_map import REGION_MAP
 
-BASE = Path(__file__).resolve().parents[2]
-SRC_1_17 = BASE / "2026-1_inAbove_Flood_SR" / "Scientific Reports" / "2026-1 submission" / "csv_fua_2026-1-17"
-TOTALGDP_CSV = BASE / "data" / "fua_totalGDP_2026-7.csv"
-OUT_DIR = BASE / "data"
+import paths
+
+SRC_1_17 = paths.FUA_2026_01
+TOTALGDP_CSV = paths.TOTAL_GDP_CSV
+OUT_DIR = paths.OUTPUT
 
 CONTINENT_FILES = ["Africa", "Asia", "CSAmerica", "Europe", "NAmerica", "Oceania"]
 METRICS = ["exDmg_sum", "exDmg_pros_sum", "exInunD_sum", "exInunD_pros_sum"]

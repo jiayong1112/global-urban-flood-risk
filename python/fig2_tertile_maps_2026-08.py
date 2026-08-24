@@ -20,9 +20,8 @@ import numpy as np
 import pandas as pd
 from matplotlib.patches import Patch
 
-HERE = Path(__file__).resolve().parent
-BASE = HERE.parents[1]
-SHP = BASE / "data" / "ne_110m_admin_0_countries" / "ne_110m_admin_0_countries.shp"
+import paths
+SHP = paths.NATURAL_EARTH
 
 TERTILE_COLORS = ["#ffeda0", "#feb24c", "#f03b20"]
 NODATA = "#d9d9d9"
@@ -57,7 +56,7 @@ def to_ne_name(name):
 def main():
     plt.rcParams["font.family"] = ["Arial", "DejaVu Sans"]
 
-    cty = pd.read_csv(BASE / "revision-2026-08" / "analysis" / "a5_country_2026-08.csv")
+    cty = pd.read_csv(paths.table("a5_country_2026-08.csv"))
     valid = (cty.exDmg_mean > 0) & (cty.exInunD_mean > 0)
     for metric, col in [("exDmg_mean", "tert_FD"), ("exInunD_mean", "tert_IR")]:
         cty[col] = np.nan
@@ -96,7 +95,7 @@ def main():
     print("    least protection: " + ", ".join(
         f"{r.country_na} ({r.red*100:.0f}%)" for r in hi.nsmallest(6, "red").itertuples()))
 
-    world = gpd.read_file(SHP)[["ADMIN", "geometry"]]
+    world = gpd.read_file(paths.need(SHP))[["ADMIN", "geometry"]]
     world = world[world.ADMIN != "Antarctica"]
     merged = world.merge(cty[["ne_name", "tert_FD", "tert_IR"]],
                          left_on="ADMIN", right_on="ne_name", how="left")
@@ -124,9 +123,9 @@ def main():
 
     fig.tight_layout(rect=(0, 0.04, 1, 1))
     for ext in ("png", "pdf"):
-        fig.savefig(HERE / f"Fig2_tertile_maps_2026-08.{ext}", dpi=300,
+        fig.savefig(paths.out(f"Fig2_tertile_maps_2026-08.{ext}"), dpi=300,
                     bbox_inches="tight", facecolor="white")
-    print("\nsaved", HERE / "Fig2_tertile_maps_2026-08.png")
+    print("\nsaved", paths.out("Fig2_tertile_maps_2026-08.png"))
 
 
 if __name__ == "__main__":

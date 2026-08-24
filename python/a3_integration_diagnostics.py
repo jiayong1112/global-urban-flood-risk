@@ -2,9 +2,10 @@
 A3 - Integration diagnostics, protection discretisation, and alpha sensitivity.
 
 Consumes the Earth Engine exports produced by
-  revision-2026-08/gee/fuaExport_diagnostics_2026-08.js
+  gee/STAGE1_diagnostics_toAsset_2026-08.js and
+  gee/STAGE2_diagnostics_fuaExport_2026-08.js
 which must be downloaded to
-  revision-2026-08/analysis/csv_fua_diag_2026-08/<HEIGHT>_<REGION>_diag_2026-08.csv
+  exports/csv_fua_diag_2026-08/<HEIGHT>_<REGION>_diag_2026-08.csv
 
 Answers, with numbers:
 
@@ -33,8 +34,9 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-HERE = Path(__file__).resolve().parent
-DIAG = HERE / "csv_fua_diag_2026-08"
+import paths
+
+DIAG = paths.DIAG_2026_08
 
 # Unzipping a Drive download often nests the folder inside itself; descend if so.
 if (DIAG / DIAG.name).is_dir():
@@ -209,7 +211,7 @@ def residual_by_standard(df: pd.DataFrame, prefix: str) -> pd.DataFrame:
 def main() -> None:
     if not DIAG.exists():
         print(f"Expected Earth Engine exports in {DIAG}")
-        print("Run revision-2026-08/gee/fuaExport_diagnostics_2026-08.js first.")
+        print("Run the gee/STAGE1*/STAGE2* diagnostics exports first.")
         sys.exit(1)
 
     data = {ds: load(ds) for ds in DATASETS}
@@ -328,7 +330,7 @@ def main() -> None:
             rho = stats.spearmanr(clean[f"exInunD_mean_{a}"],
                                   clean[f"exInunD_mean_{b}"]).statistic
             print(f"    {a:6s} vs {b:6s}  Spearman rho = {rho:.3f}")
-        clean.to_csv(HERE / "a3_height_sensitivity_recomputed.csv", index=False)
+        clean.to_csv(paths.out("a3_height_sensitivity_recomputed.csv"), index=False)
     else:
         print("  Needs all three height datasets; found: " + ", ".join(data))
 
@@ -388,13 +390,13 @@ def main() -> None:
         show = curve[curve["eFUA_name"].isin(cities)]
         if not show.empty:
             print(show.set_index("eFUA_name").round(4).to_string())
-        curve.to_csv(HERE / "a3_residual_vs_standard.csv", index=False)
+        curve.to_csv(paths.out("a3_residual_vs_standard_2026-08.csv"), index=False)
         print("\n  Wrote a3_residual_vs_standard.csv (all FUAs)")
     else:
         print("  skipped: needs the 'perRP' band group")
 
     for ds, df in data.items():
-        df.to_csv(HERE / f"a3_diag_{ds}.csv", index=False)
+        df.to_csv(paths.out(f"a3_diag_{ds}_2026-08.csv"), index=False)
     print("\nWrote a3_diag_*.csv")
 
 
